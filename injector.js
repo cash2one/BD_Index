@@ -6,3 +6,13 @@ r.ipcRenderer.on("cmd", (event, args) => {
     r.ipcRenderer.sendToHost("resp", { error: e });
   }
 });
+
+document.addEventListener("DOMContentLoaded", () => {
+    console.log(BID);
+    
+});
+
+window.onload = function() {
+  document.getElementsByTagName("script");
+  console.log(PPval);
+};

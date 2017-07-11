@@ -1,5 +1,6 @@
 const electron = require("electron");
 const app = electron.app;
+const session = electron.session;
 const BrowserWindow = electron.BrowserWindow;
 
 const path = require("path");
@@ -8,7 +9,22 @@ const url = require("url");
 let mainWindow;
 
 function createWindow() {
-  mainWindow = new BrowserWindow({ width: 800, height: 600, title: "Baidu Index - Injector" });
+  mainWindow = new BrowserWindow({
+    width: 800,
+    height: 600,
+    title: "Baidu Index - Injector"
+  });
+
+  const ses = session.fromPartition('persist:baidu')
+  ses.setProxy({
+    pacScript: url.format({
+      pathname: path.join(__dirname, "proxy.pac"),
+      protocol: "file:",
+      slashes: true
+    })
+  }, () =>{
+      console.log(';done;');
+  })
 
   mainWindow.loadURL(
     url.format({
@@ -17,9 +33,8 @@ function createWindow() {
       slashes: true
     })
   );
-
   // Open the DevTools.
-  // mainWindow.webContents.openDevTools()
+  mainWindow.webContents.openDevTools()
 
   mainWindow.on("closed", function() {
     mainWindow = null;
