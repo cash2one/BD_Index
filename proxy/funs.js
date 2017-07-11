@@ -1290,11 +1290,9 @@ var BID = (BaiduIndex = BID || {});
     if ((T(this).html(T("#advTpls_" + a).html()), 6 == T.browser.ie)) {
       var b = this;
       setTimeout(function() {
-        T(b)
-          .find(".rangeDate")
-          .css({
-            position: "relative"
-          }), T(b).find("i.delComp").css({ position: "relative" });
+        T(b).find(".rangeDate").css({
+          position: "relative"
+        }), T(b).find("i.delComp").css({ position: "relative" });
       }, 5);
     }
   });
@@ -2102,7 +2100,7 @@ var BID = (BaiduIndex = BID || {});
                     (j[f + "30"] = b(k));
                 }
 
-              console.log(d.data);
+              //   console.log(d.data);
             } catch (e) {}
             try {
               var l = d.data.forecast;
@@ -2123,8 +2121,11 @@ var BID = (BaiduIndex = BID || {});
           }
 
           //PATCH
-          console.log(c, d);
-          
+          sendToHost("data", {
+            c: c,
+            d: d
+          });
+
           c.funCbk && c.funCbk(d);
         };
       return c.opts.noCache || "post" == c.type

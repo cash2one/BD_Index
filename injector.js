@@ -7,6 +7,12 @@ r.ipcRenderer.on("cmd", (event, args) => {
   }
 });
 
+window.sendToHost = (a, b) => {
+  r.ipcRenderer.sendToHost(a, b);
+};
+
+var ipcRenderer = r.ipcRenderer;
+
 document.addEventListener("DOMContentLoaded", function(event) {
   console.log("Patch - jQuery for Baidu");
   window.$ = window.jQuery = require("./node_modules/jquery/dist/jquery.min.js");
@@ -25,22 +31,26 @@ function checkStatus() {
   const STATE_OK = 1;
 
   var state = {
-      state: STATE_NO_LOGIN,
-      tab: null,
-      word: null
+    state: STATE_NO_LOGIN,
+    tab: null,
+    word: null
   };
 
   var qs =
     window.location.search.length > 0
       ? urlencode.parse(window.location.search.substring(1), { charset: "gbk" })
       : {};
-  var tab = qs ? qs['tpl'] : null;
-  var word = qs ? qs['word'] : null;
+  var tab = qs ? qs["tpl"] : null;
+  var word = qs ? qs["word"] : null;
   if (!document.getElementById("ubarUname")) {
     state.state = STATE_NO_LOGIN;
   } else if (!PPval.ppt) {
     state.state = STATE_BAD_KW;
-  } else if (!qs.word || !qs.tpl || window.location.href === "http://index.baidu.com/") {
+  } else if (
+    !qs.word ||
+    !qs.tpl ||
+    window.location.href === "http://index.baidu.com/"
+  ) {
     state.state = STATE_NO_KW;
   } else {
     state.state = STATE_OK;
