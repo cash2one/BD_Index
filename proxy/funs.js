@@ -2101,6 +2101,8 @@ var BID = (BaiduIndex = BID || {});
                   k && (j[f + "100"] = b(k)), (k = j[f + "30"]), k &&
                     (j[f + "30"] = b(k));
                 }
+
+              console.log(d.data);
             } catch (e) {}
             try {
               var l = d.data.forecast;
@@ -2119,6 +2121,10 @@ var BID = (BaiduIndex = BID || {});
                 }
             } catch (e) {}
           }
+
+          //PATCH
+          console.log(c, d);
+          
           c.funCbk && c.funCbk(d);
         };
       return c.opts.noCache || "post" == c.type
