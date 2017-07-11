@@ -15,5 +15,10 @@
   "bugs": {
     "url": "https://github.com/luan007/BD_Index/issues"
   },
-  "homepage": "https://github.com/luan007/BD_Index#readme"
+  "homepage": "https://github.com/luan007/BD_Index#readme",
+  "dependencies": {
+    "cors": "^2.8.3",
+    "express": "^4.15.3",
+    "serve-static": "^1.12.3"
+  }
 }
