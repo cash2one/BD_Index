@@ -1,0 +1,19 @@
+{
+  "name": "bd_index",
+  "version": "1.0.0",
+  "description": "Baidu Index Redesign (IX - Show)",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/luan007/BD_Index.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/luan007/BD_Index/issues"
+  },
+  "homepage": "https://github.com/luan007/BD_Index#readme"
+}
