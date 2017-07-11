@@ -16,21 +16,38 @@ document.addEventListener("DOMContentLoaded", function(event) {
   console.log(PPval);
 });
 
+var urlencode = require("urlencode");
 
 function checkStatus() {
   const STATE_NO_LOGIN = -1;
   const STATE_BAD_KW = -2;
   const STATE_NO_KW = 0;
   const STATE_OK = 1;
-  var state = 0;
+
+  var state = {
+      state: STATE_NO_LOGIN,
+      tab: null,
+      word: null
+  };
+
+  var qs =
+    window.location.search.length > 0
+      ? urlencode.parse(window.location.search.substring(1), { charset: "gbk" })
+      : {};
+  var tab = qs ? qs['tpl'] : null;
+  var word = qs ? qs['word'] : null;
   if (!document.getElementById("ubarUname")) {
-    state = STATE_NO_LOGIN;
+    state.state = STATE_NO_LOGIN;
   } else if (!PPval.ppt) {
-    state = STATE_BAD_KW;
-  } else if (window.location.href === "http://index.baidu.com/") {
-    state = STATE_NO_KW;
+    state.state = STATE_BAD_KW;
+  } else if (!qs.word || !qs.tpl || window.location.href === "http://index.baidu.com/") {
+    state.state = STATE_NO_KW;
   } else {
-    state = STATE_OK;
+    state.state = STATE_OK;
   }
-  return state
+
+  state.word = word;
+  state.tab = tab;
+
+  return state;
 }
