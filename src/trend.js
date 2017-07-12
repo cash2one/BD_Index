@@ -6,12 +6,12 @@ global.state = {
   selection: 0
 };
 
-global.selectState = (x)=>{
-    TweenLite.to(state, 0.8, {
-        selection : x,
-        ease: Expo.easeOut
-    });
-}
+global.selectState = x => {
+  TweenLite.to(state, 0.8, {
+    selection: x,
+    ease: Expo.easeOut
+  });
+};
 // window.addEventListener(
 //   "resize",
 //   function() {
@@ -44,19 +44,73 @@ class trendy {
       shading: THREE.FlatShading,
       depthTest: false
     });
-    this.geometry = new THREE.PlaneGeometry(30, 30);
-    this.QUAD = new THREE.Mesh(this.geometry, this.material);
+    this.geometry = new THREE.PlaneGeometry(40, 40);
+    this.textureMesh = new THREE.Mesh(this.geometry, this.material);
+    this.QUAD = new THREE.Group();
+    this.QUAD.add(this.textureMesh);
+
+    this.managedLines = [];
+    for (var x = -20 + 5; x < 20; x += 5) {
+      var geometry = new THREE.Geometry();
+      geometry.vertices.push(new THREE.Vector3(0, -15, 0));
+      geometry.vertices.push(new THREE.Vector3(0, 15, 0));
+      geometry.colors.push(new THREE.Color().setHSL(0.2, 1, 0.8));
+      geometry.colors.push(new THREE.Color().setHSL(0, 0, 0));
+      var mat = new THREE.LineBasicMaterial({
+        transparent: true,
+        color: 0xffffff,
+        blending: THREE.AdditiveBlending,
+        vertexColors: THREE.VertexColors
+      });
+      var line = new THREE.Line(geometry, mat);
+      line.position.x = x;
+      this.QUAD.add(line);
+      this.managedLines.push(line);
+    }
+
+    var geometry = new THREE.PlaneGeometry(40, 0.3);
+    var mat = new THREE.MeshBasicMaterial({
+      transparent: true,
+      color: 0xefef11,
+      side: THREE.DoubleSide,
+      blending: THREE.AdditiveBlending
+    });
+    var bar = new THREE.Mesh(geometry, mat);
+    bar.position.y = -14.99;
+    bar.rotation.x = -Math.PI / 2;
+    this.bar = bar;
+    this.QUAD.add(bar);
+
+    var geometry = new THREE.PlaneGeometry(6, 3);
+    var mat = new THREE.MeshBasicMaterial({
+      transparent: true,
+      vertexColors: THREE.VertexColors,
+      blending: THREE.AdditiveBlending
+    });
+    geometry.faces[0].vertexColors[0] = new THREE.Color(0x0050a4);
+    geometry.faces[0].vertexColors[1] = new THREE.Color(0x0050a4);
+    geometry.faces[0].vertexColors[2] = new THREE.Color(0x4fa8b6);
+    geometry.faces[1].vertexColors[0] = new THREE.Color(0x0050a4);
+    geometry.faces[1].vertexColors[1] = new THREE.Color(0x0050a4);
+    geometry.faces[1].vertexColors[2] = new THREE.Color(0x4fa8b6);
+    
+    var text = new THREE.Mesh(geometry, mat);
+    text.position.z = 3;
+    text.position.x = 13;
+    text.position.y = -10;
+    this.QUAD.add(text);
   }
 
   render() {
-    this.visibility = state.visibility * (1 - Math.min(1, Math.abs(this.id - state.selection)));
+    this.visibility =
+      state.visibility * (1 - Math.min(1, Math.abs(this.id - state.selection)));
     this.canvas.height = 1024 * this.SCALER;
     this.canvas.width = 1024 * this.SCALER;
     let ctx = this.ctx;
     let pt = this.pt;
     let texture = this.texture;
     let canvas = this.canvas;
-    ctx.globalAlpha = this.visibility * 0.8 + 0.2;
+    ctx.globalAlpha = this.visibility * 0.9 + 0.1;
     ctx.save();
     ctx.scale(this.SCALER, this.SCALER);
     var points = JSON.parse(pt);
@@ -96,10 +150,37 @@ class trendy {
       canvas.width / this.SCALER,
       0
     );
-    var offset = Math.abs(Math.sin(t / 3) * 0.5) + 0.25;
-    gradient.addColorStop(Math.max(0, offset - 0.1), "#009af5");
-    gradient.addColorStop(offset, "#7ccbf2");
-    gradient.addColorStop(Math.min(1, offset + 0.1), "#009af5");
+    var offset = t / 3 % (1 + 0.2) - 0.1;
+    var dim = "black";
+    var lig = "#efef00";
+    gradient.addColorStop(Math.max(0, offset - 0.1), dim);
+    gradient.addColorStop(Math.min(Math.max(offset, 0), 1), lig);
+    gradient.addColorStop(Math.min(1, offset + 0.1), dim);
+
+    for (var i = 0; i < this.managedLines.length; i++) {
+      var d =
+        1 -
+        Math.abs(
+          Math.max(
+            -0.2,
+            Math.min(0.2, (this.managedLines[i].position.x + 20) / 40 - offset)
+          )
+        ) *
+          5;
+      this.managedLines[i].material.opacity = d * 0.5 + 0.5;
+    }
+
+    this.bar.material.opacity = this.visibility * 0.3 + 0.2;
+
+    var col = new THREE.Color()
+      .setHSL(0.56, 1, this.visibility * 0.28 + 0.2)
+      .getStyle();
+
+    // var lig = new THREE.Color().setHSL(0.56, 0.8, 0.8 - this.visibility * 0.48).getStyle();
+
+    // gradient.addColorStop(Math.max(0, offset - 0.1), dim);
+    // gradient.addColorStop(offset, lig);
+    // gradient.addColorStop(Math.min(1, offset + 0.1), dim);
 
     ctx.strokeStyle = gradient;
     ctx.lineWidth = 6;
@@ -107,8 +188,8 @@ class trendy {
     ctx.stroke();
     ctx.filter = "none";
     ctx.stroke();
-    ctx.strokeStyle = "rgba(255,255,255,0.2)";
-    ctx.lineWidth = 2;
+    ctx.strokeStyle = col;
+    ctx.lineWidth = this.visibility * 3 + 3;
     ctx.stroke();
 
     ctx.globalCompositeOperation = "normal";

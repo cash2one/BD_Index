@@ -1,7 +1,7 @@
 import * as three from "three";
 import * as shared from "./shared.js"
 import { MeshLine, MeshLineMaterial } from "three.meshline";
-global.CAM_BASE = 28;
+global.CAM_BASE = 30;
 // init renderer
 var renderer = new THREE.WebGLRenderer({
   antialias: true,

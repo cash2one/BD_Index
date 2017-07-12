@@ -2,7 +2,7 @@
 import "./common.less";
 
 import * as d3 from "../node_modules/d3/index.js";
-
+import "./assets.js"
 import * as bg from "./fancybg.js";
 import * as trend from "./trend.js";
 import { TweenLite } from "gsap";
