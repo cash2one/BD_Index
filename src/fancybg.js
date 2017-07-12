@@ -1,6 +1,7 @@
 import * as three from "three";
+import * as shared from "./shared.js"
 import { MeshLine, MeshLineMaterial } from "three.meshline";
-
+global.CAM_BASE = 28;
 // init renderer
 var renderer = new THREE.WebGLRenderer({
   antialias: true,
@@ -12,15 +13,10 @@ renderer.setPixelRatio(window.devicePixelRatio);
 // renderer.shadowMapType = THREE.PCFSoftShadowMap;
 document.body.appendChild(renderer.domElement);
 // init scene and camera
-var scene = new THREE.Scene();
-var camera = new THREE.PerspectiveCamera(
-  60,
-  window.innerWidth / window.innerHeight,
-  0.1,
-  1000
-);
+var scene = shared.scene;
+var camera = shared.camera;
 // camera.position.set(50, 10, 0);
-camera.position.z = 100;
+camera.position.z = CAM_BASE;
 
 var resolution = new THREE.Vector2(window.innerWidth, window.innerHeight);
 var controls = new THREE.OrbitControls(camera, renderer.domElement);
@@ -86,10 +82,10 @@ left.position.x = -20;
 right.rotation.z = Math.PI / 2;
 right.position.x = 20;
 
-top.position.z = -10;
-left.position.z = -10;
-right.position.z = -10;
-bottom.position.z = -10;
+top.position.z = -20;
+left.position.z = -20;
+right.position.z = -20;
+bottom.position.z = -20;
 
 // function buildGrid(size, scale) {
 //   scale = scale || 2;

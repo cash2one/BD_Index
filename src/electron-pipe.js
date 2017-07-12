@@ -1,4 +1,4 @@
-import * as urlencode from "urlencode";
+var urlencode = require("urlencode");
 
 var webview = document.getElementById("view");
 
@@ -7,6 +7,8 @@ function gotoTab(tab, keyword) {
   var build = "?tpl=" + tab + "&word=" + word;
   webview.loadURL("http://index.baidu.com/" + build);
 }
+
+global.gotoTab = gotoTab;
 
 webview.addEventListener("did-finish-load", () => {
   console.log("Resource Loaded..");

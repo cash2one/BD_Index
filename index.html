@@ -1,6 +1,7 @@
 <html>
 
 <head>
+    <script src='lib/glfx.js'></script>
     <script src='node_modules/three/build/three.js'></script>
     <script src='node_modules/three/examples/js/controls/OrbitControls.js'></script>
 
@@ -20,6 +21,7 @@
 <body>
 
     <webview partition='persist:baidu' id='view' src="http://index.baidu.com/" preload='injector.js' autosize></webview>
+    <script src='src/electron-pipe.js'></script>
     <script src='dist/out.js'></script>
 
 </body>
