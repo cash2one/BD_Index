@@ -1,0 +1,51 @@
+body,
+html {
+    margin: 0;
+    padding: 0;
+    height: 100%;
+    width: 100%;
+    background: #0f0f0f;
+}
+
+svg {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    path {
+        stroke-width: 10px;
+        fill: transparent;
+        stroke: #a1d7e6;
+        stroke-linecap: round;
+        /* box-shadow: 3px 3px 3px #fff; */
+        filter: blur(15px);
+    }
+}
+
+canvas {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    width: 100%;
+    height: 100%;
+}
+
+webview {
+    position: absolute;
+    top: 0;
+    left: 0;
+    opacity: 0;
+    pointer-events: none;
+    z-index: 9999;
+    display: inline-flex;
+    width: 100%;
+    height: 100%;
+    display: none;
+    .enabled {
+        opacity: 1;
+        pointer-events: all;
+    }
+}

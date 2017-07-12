@@ -1,24 +1,27 @@
 <html>
+
 <head>
-    <style>
-        webview {
-            display: inline-flex;
-            width: 100%;
-            height: 100%;
-        }
-        body,
-        html {
-            margin: 0;
-            padding: 0;
-            height: 100%;
-            width: 100%;
-        }
-    </style>
+    <script src='node_modules/three/build/three.js'></script>
+    <script src='node_modules/three/examples/js/controls/OrbitControls.js'></script>
+
+    <script src="node_modules/three/examples/js/shaders/ConvolutionShader.js"></script>
+    <script src="node_modules/three/examples/js/shaders/CopyShader.js"></script>
+    <script src="node_modules/three/examples/js/shaders/FXAAShader.js"></script>
+    <script src="node_modules/three/examples/js/shaders/SSAOShader.js"></script>
+
+    <script src="node_modules/three/examples/js/postprocessing/EffectComposer.js"></script>
+    <script src="node_modules/three/examples/js/postprocessing/MaskPass.js"></script>
+    <script src="node_modules/three/examples/js/postprocessing/RenderPass.js"></script>
+    <script src="node_modules/three/examples/js/postprocessing/ShaderPass.js"></script>
+    <script src="node_modules/three/examples/js/postprocessing/BloomPass.js"></script>
+
 </head>
 
 <body>
-    <webview partition='persist:baidu'  id='view' src="http://index.baidu.com/" preload='injector.js' load-commit='loaded' autosize minwidth="800" minheight="600"></webview>
-    <script src='index.js'></script>
+
+    <webview partition='persist:baidu' id='view' src="http://index.baidu.com/" preload='injector.js' autosize></webview>
+    <script src='dist/out.js'></script>
+
 </body>
 
 </html>

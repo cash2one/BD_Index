@@ -1,14 +1,8 @@
 var r = require("electron");
-r.ipcRenderer.on("cmd", (event, args) => {
-  try {
-    r.ipcRenderer.sendToHost("resp", { result: eval(args) });
-  } catch (e) {
-    r.ipcRenderer.sendToHost("resp", { error: e });
-  }
-});
 
 window.sendToHost = (a, b) => {
-  r.ipcRenderer.sendToHost(a, b);
+  console.log("Reporting Data (ipc) evt:", a)
+  r.ipcRenderer.sendToHost(a, b); //jail break
 };
 
 var ipcRenderer = r.ipcRenderer;
@@ -20,6 +14,11 @@ document.addEventListener("DOMContentLoaded", function(event) {
   console.log("Read Current Page State: ", checkStatus());
   console.log("PPval (Baidu)");
   console.log(PPval);
+  sendToHost('state', checkStatus());
+});
+
+document.addEventListener("load", function(event) {
+  sendToHost('loaded');
 });
 
 var urlencode = require("urlencode");
