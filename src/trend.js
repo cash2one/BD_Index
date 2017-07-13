@@ -1,8 +1,8 @@
 import * as shared from "./shared.js";
 import { TweenLite, Bounce, Cubic, Quad, Expo } from "gsap";
 import { assets } from "./assets.js";
-global.state = {
-  visibility: 1,
+var state = {
+  visibility: 0,
   selection: 0
 };
 
@@ -22,21 +22,35 @@ global.selectState = x => {
 // );
 
 class trendy {
-  constructor(id, TEXT) {
-    this.pt = [];
-    this.canvas = document.createElement("canvas");
-    this.SCALER = 1;
-    this.id = id;
-    this.visibility = 0;
+  bindData(arr) {
+    this.points = JSON.parse(JSON.stringify(arr));
+    for (var p = 0; p < this.points.length; p++) {
+      this.points[p].x *= 1024 / this.SCALER;
+      this.points[p].y *= 1024 / this.SCALER;
+      this.points[p].sel = 0;
+    }
+  }
+
+  generateDummyData() {
+    var pt = [];
     for (var i = 0.05; i < 0.95; i += 0.05) {
-      this.pt.push({
+      pt.push({
         x: i,
         y: (Math.random() - 0.5) * 0.3 + 0.5,
         q: "30%",
         d: "2017-7-12"
       });
     }
-    this.pt = JSON.stringify(this.pt);
+    return pt;
+  }
+
+  constructor(id, TEXT) {
+    this.canvas = document.createElement("canvas");
+    this.SCALER = 1;
+    this.id = id;
+    this.visibility = 0;
+    this.bindData(this.generateDummyData());
+
     // document.querySelector("body").appendChild(canvas);
     this.canvas.style.pointerEvents = "none";
     this.ctx = this.canvas.getContext("2d");
@@ -138,6 +152,7 @@ class trendy {
     this.visibility =
       state.visibility * (1 - Math.min(1, Math.abs(this.id - state.selection)));
 
+
     var intersection = null;
     if (this.visibility && this.id == state.selection) {
       var intersects = shared.mouse.raycaster.intersectObject(
@@ -145,9 +160,11 @@ class trendy {
         true
       );
       if (intersects.length > 0) {
-        intersects[0].point.add(new THREE.Vector3(20, 20, 0));
-        intersects[0].point.multiplyScalar(1 / 40 * 1024, 1 / 40 * 1024);
-        intersection = intersects[0];
+        intersects[0].point.y *= -1;
+        intersects[0].point.add(new THREE.Vector3(20, -20, 0));
+        intersects[0].point.multiplyScalar(1 / 40 * 1024);
+        intersects[0].point.y += 1024;
+        intersection = intersects[0].point;
       }
     }
 
@@ -162,18 +179,12 @@ class trendy {
     this.canvas.height = 1024 * this.SCALER;
     this.canvas.width = 1024 * this.SCALER;
     let ctx = this.ctx;
-    let pt = this.pt;
     let texture = this.texture;
     let canvas = this.canvas;
     ctx.globalAlpha = this.visibility * 0.9 + 0.1;
     ctx.save();
     ctx.scale(this.SCALER, this.SCALER);
-    var points = JSON.parse(pt);
-
-    for (var p = 0; p < points.length; p++) {
-      points[p].x *= canvas.width / this.SCALER;
-      points[p].y *= canvas.height / this.SCALER;
-    }
+    var points = this.points;
 
     ctx.clearRect(
       0,
@@ -251,22 +262,21 @@ class trendy {
     ctx.closePath();
 
     for (var i = 0; i < points.length; i++) {
-      ctx.save();
-      ctx.translate(points[i].x, points[i].y);
-      ctx.scale(1, 1);
-      ctx.beginPath();
-      ctx.arc(0, 0, 5, 0, Math.PI * 2);
-      ctx.fillStyle = "#fff";
-      ctx.fill();
-      ctx.strokeStyle = "rgba(0, 0, 0, 0.5)";
-      ctx.lineWidth = 3;
-      ctx.stroke();
-      ctx.closePath();
-      ctx.restore();
+      var selected =
+        intersection &&
+        (points[i].x - intersection.x) * (points[i].x - intersection.x) +
+          (points[i].y - intersection.y) * (points[i].y - intersection.y) <
+          200;
+      var j = points[i];
+      TweenLite.to(j, 0.5, {
+        sel: selected ? 1 : 0
+      });
     }
 
-    //max
     ctx.globalCompositeOperation = "lighter";
+    //max
+    ctx.textAlign = "center";
+    ctx.textBaseline = "middle";
     for (var i = 0; i < points.length; i++) {
       ctx.save();
       ctx.translate(points[i].x, points[i].y);
@@ -277,9 +287,36 @@ class trendy {
       // ctx.fillStyle = "#fff";
       // ctx.fill();
       var color = new THREE.Color();
-      color.setHSL(0.55, sc, sc);
+      color.setHSL(0.55, sc, sc + points[i].sel);
       ctx.strokeStyle = color.getStyle();
       ctx.lineWidth = sc * 3;
+      ctx.stroke();
+      ctx.closePath();
+
+      if (this.visibility > 0.7) {
+        ctx.font = "15px Nexa Bold";
+        ctx.translate(0, -30 - points[i].sel * 20);
+        ctx.scale(points[i].sel + 1, points[i].sel + 1);
+        ctx.fillStyle = color.getStyle();
+        ctx.fillText(points[i].q, 0, 0);
+        if (points[i].sel > 0.3) {
+          ctx.font = "7px Nexa Light";
+          ctx.fillText(points[i].d, 0, -15);
+        }
+      }
+      ctx.restore();
+    }
+
+    for (var i = 0; i < points.length; i++) {
+      ctx.save();
+      ctx.translate(points[i].x, points[i].y);
+      ctx.scale(points[i].sel * 3 + 1, points[i].sel * 3 + 1);
+      ctx.beginPath();
+      ctx.arc(0, 0, 5, 0, Math.PI * 2);
+      ctx.fillStyle = "#fff";
+      ctx.fill();
+      ctx.strokeStyle = "rgba(0, 0, 0, 0.5)";
+      ctx.lineWidth = 3;
       ctx.stroke();
       ctx.closePath();
       ctx.restore();
@@ -306,6 +343,8 @@ trendPC.QUAD.position.z = STEP;
 trendMobile.QUAD.position.z = STEP * 2;
 
 export function render() {
+  GROUP.visible = this.visibility;
+  if(!this.visibility) return;
   trendAll.render();
   trendPC.render();
   trendMobile.render();
