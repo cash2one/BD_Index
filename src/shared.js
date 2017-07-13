@@ -7,6 +7,7 @@ export var camera = new THREE.PerspectiveCamera(
   0.1,
   1000
 );
+//
 
 var light = new THREE.AmbientLight(0xffffff); // soft white light
 scene.add(light);
