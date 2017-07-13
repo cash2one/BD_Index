@@ -6,7 +6,7 @@ var state = {
   selection: 0
 };
 
-global.selectState = x => {
+var selectState = x => {
   TweenLite.to(state, 0.8, {
     selection: x,
     ease: Expo.easeOut
@@ -143,7 +143,7 @@ class trendy {
       btn.add(bg);
     }
 
-    btn.position.z = 3;
+    btn.position.z = -9;
     btn.position.x = 13;
     btn.position.y = -10;
     this.tag = btn;
@@ -168,13 +168,25 @@ class trendy {
         intersection = intersects[0].point;
       }
     }
-
+    var intersects = shared.mouse.raycaster.intersectObjects(
+      this.tag.children,
+      true
+    );
+    var viz = this.visibility;
+    if (intersects.length > 0) {
+      viz += 0.3;
+      if (shared.mouse.up) {
+        selectState(this.id);
+      }
+    }
     // this.tag.children[1].position.x = 5 - this.visibility * 5;
     // this.tag.children[1].material.opacity = this.visibility * 0.5 + 0.5;
     // this.tag.children[0].position.x = 5 - this.visibility * 5;
     // this.tag.children[0].position.z = -(1-this.visibility) * 1.5;
+    this.tag.children[0].material.opacity = viz * 0.8 + 0.2;
     for (var i = 1; i < this.tag.children.length; i++) {
-      this.tag.children[i].position.z = (-1.5 + i) * (this.visibility + 0.5);
+      this.tag.children[i].position.z = (-2.5 + i) * (viz + 0.5);
+      this.tag.children[i].material.opacity = viz * 0.3 + 0.2;
     }
 
     this.canvas.height = 1024 * this.SCALER;
@@ -351,8 +363,8 @@ export function render() {
   trendAll.render();
   trendPC.render();
   trendMobile.render();
-  // shared.camera.position.z =
-  //   CAM_BASE + 5 - 5 * state.visibility + state.selection * STEP;
+  shared.camera.position.z =
+    CAM_BASE + 5 - 5 * state.visibility + state.selection * STEP;
 }
 
 shared.events.on("data", d => {
@@ -369,9 +381,13 @@ shared.events.on("data", d => {
       d: actualD.getFullYear() + "-" + (actualD.getMonth() + 1)
     };
   };
-  var all = d["Search/getAllIndex/"].all[0].userIndexes_100.split(",").map(proc);
+  var all = d["Search/getAllIndex/"].all[0].userIndexes_100
+    .split(",")
+    .map(proc);
   var pc = d["Search/getAllIndex/"].pc[0].userIndexes_100.split(",").map(proc);
-  var mob = d["Search/getAllIndex/"].wise[0].userIndexes_100.split(",").map(proc);
+  var mob = d["Search/getAllIndex/"].wise[0].userIndexes_100
+    .split(",")
+    .map(proc);
   trendAll.bindData(all);
   trendPC.bindData(pc);
   trendMobile.bindData(mob);

@@ -18,11 +18,18 @@ export var mouse = {
   x: 0,
   y: 0,
   vec: new THREE.Vector3(),
+  up: false,
   raycaster: new THREE.Raycaster()
 };
 
-global.mouse = mouse;
+export function render() {
+  mouse.up = false;
+}
 
+global.mouse = mouse;
+document.addEventListener("mouseup", e => {
+  mouse.up = true;
+});
 document.addEventListener("mousemove", e => {
   mouse.x = e.x;
   mouse.y = e.y;
@@ -74,10 +81,7 @@ var app = new Vue({
           stage: 0,
           stages: ["trend", "demand", "sentiment", "crowd"],
           stage_req: [
-            [
-              "Search/getAllIndex/",
-              "Newwordgraph/getNewsByDateList/"
-            ],
+            ["Search/getAllIndex/", "Newwordgraph/getNewsByDateList/"],
             ["Newwordgraph/"],
             [
               "search/getNews/",
