@@ -38,7 +38,6 @@ document.addEventListener("mousemove", e => {
   );
 });
 
-
 //UI Stuff & Bindings
 import "./ui.less";
 import $ from "jQuery";
@@ -46,15 +45,152 @@ import * as shared from "./shared.js";
 
 export var data = {
   tab: 0,
-  runtime: {}
+  runtime: {
+    state: 0
+  },
+  protobuf: {},
+  purposedWord: "",
+  loading: false,
+  statusMessage: "已加载"
 };
+
 var app = new Vue({
   el: "#vue-main",
   data: data,
   methods: {
     setTab: t => {
       data.tab = t;
-      console.log(t);
+    },
+    trySearch: e => {
+      if (e.code == "Enter" && !data.loading) {
+        //
+        data.protobuf = {
+          todo: [],
+          word: data.purposedWord,
+          stage: 0,
+          stages: ["trend", "demand", "sentiment", "crowd"],
+          stage_req: [
+            ["Search/getAllIndex/", "Newwordgraph/getNewsByDateList/"],
+            ["Newwordgraph/"],
+            [
+              "search/getNews/",
+              "Zhidao/getZhidao/",
+              "News/getNews/",
+              "News/getNews/"
+            ],
+            ["Region/getRegion/", "Social/getSocial/"]
+          ],
+          list: []
+        };
+        data.statusMessage = "数据加载中...";
+        data.loading = true;
+        req();
+      }
     }
+  }
+});
+
+function parseDate(str) {
+  var y = str.substr(0, 4),
+    m = str.substr(4, 2),
+    d = str.substr(6, 2);
+  return new Date(y, m, d);
+}
+
+function periodParser(p) {
+  return [parseDate(p.split("|")[0]), parseDate(p.split("|")[1])];
+}
+
+function parseData() {
+  var lst = data.protobuf.list;
+  var d = {};
+  for (var i = 0; i < lst.length; i++) {
+    if (d[lst[i].path] && lst[i].path == "News/getNews/") {
+      var n = periodParser(lst[i].data.data[0].period)[0];
+      var p = periodParser(d[lst[i].path].period)[0];
+      if (n > p) {
+        d[lst[i].path + "history"] = d[lst[i].path];
+        d[lst[i].path] = Array.isArray(lst[i].data.data)
+          ? lst[i].data.data[0]
+          : lst[i].data.data;
+      } else {
+        d[lst[i].path + "history"] = Array.isArray(lst[i].data.data)
+          ? lst[i].data.data[0]
+          : lst[i].data.data;
+      }
+    } else {
+      d[lst[i].path] = Array.isArray(lst[i].data.data)
+        ? lst[i].data.data[0]
+        : lst[i].data.data;
+    }
+  }
+  console.log(Object.keys(d));
+}
+
+function req() {
+  data.statusMessage = "请求 " + data.protobuf.stages[data.protobuf.stage];
+  gotoTab(data.protobuf.stages[data.protobuf.stage], data.purposedWord);
+}
+function march(path, d, c) {
+  if (data.protobuf.stage > 3) return; //malfunction
+  var cur = data.protobuf.stage_req[data.protobuf.stage];
+  var i = cur.indexOf(path);
+  if (i < 0) {
+    return; //throw!
+  }
+  cur.splice(i, 1);
+  data.protobuf.list.push({
+    path: c.name,
+    data: d
+  });
+  data.statusMessage = ".. " + path;
+  if (cur.length == 0) {
+    //advance
+    if (data.protobuf.stage >= 3) {
+      data.loading = false;
+      data.statusMessage = "已加载";
+      parseData();
+    } else {
+      data.protobuf.stage++;
+      return req();
+    }
+  } else {
+    //wait
+  }
+}
+
+webview.addEventListener("ipc-message", function(e) {
+  switch (e.channel) {
+    case "data":
+      var c = e.args[0].c;
+      var d = e.args[0].d;
+      if (d.data.code) {
+      } else {
+        march(c.name, d, c);
+        // console.log(d);
+      }
+      break;
+    case "state":
+      // console.log("state updated");
+      // console.log(e.args[0]);
+      var s = e.args[0];
+      if (s.state == 1) {
+        //good..
+      } else if (s.state == -2) {
+        data.loading = false;
+        data.statusMessage = "* 关键词暂未收录 *";
+      } else if (s.state == -1) {
+        data.loading = false;
+        data.statusMessage = "* 需重新登陆 *";
+      } else if (s.state == 0) {
+        data.loading = false;
+        data.statusMessage = "无数据";
+      }
+      data.runtime.state = s.state;
+      // _state = e.args[0];
+      break;
+    // case "loaded":
+    //   console.log("inner page loaded");
+    //   break;
   }
 });

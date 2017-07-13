@@ -152,7 +152,6 @@ class trendy {
     this.visibility =
       state.visibility * (1 - Math.min(1, Math.abs(this.id - state.selection)));
 
-
     var intersection = null;
     if (this.visibility && this.id == state.selection) {
       var intersects = shared.mouse.raycaster.intersectObject(
@@ -343,10 +342,13 @@ trendPC.QUAD.position.z = STEP;
 trendMobile.QUAD.position.z = STEP * 2;
 
 export function render() {
-  GROUP.visible = this.visibility;
-  if(!this.visibility) return;
+  TweenLite.to(state, 0.5, { visibility: shared.data.tab == 0 ? 1 : 0 });
+  GROUP.visible = state.visibility < 0.1 ? 0 : 1;
+  GROUP.position.z = -50 + state.visibility * 50;
+  if (state.visibility < 0.2) return;
   trendAll.render();
   trendPC.render();
   trendMobile.render();
-  shared.camera.position.z = CAM_BASE + state.selection * STEP;
+  shared.camera.position.z =
+    CAM_BASE + 5 - 5 * state.visibility + state.selection * STEP;
 }
