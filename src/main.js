@@ -5,6 +5,7 @@ import "./assets.js"
 import * as d3 from "../node_modules/d3/index.js";
 import * as bg from "./fancybg.js";
 import * as trend from "./trend.js";
+import * as sentiment from "./sentiment.js";
 import * as shared from "./shared.js";
 import { TweenLite } from "gsap";
 
@@ -12,6 +13,7 @@ function render() {
   var t = Date.now() / 1000;
   global.t = t;
   trend.render();
+  sentiment.render();
   bg.render();
   shared.render();
 }

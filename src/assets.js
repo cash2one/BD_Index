@@ -22,3 +22,4 @@ global.assets = assets;
 assets["trend-pc"] = renderToTexture(256, 128, "PC端趋势", "#fff", "40px Nexa Bold, PingFang SC");
 assets["trend-mob"] = renderToTexture(256, 128, "移动端趋势", "#fff", "40px Nexa Bold, PingFang SC");
 assets["trend-all"] = renderToTexture(256, 128, "整体趋势", "#fff", "40px Nexa Bold, PingFang SC");
+assets["sentiment-7"] = renderToTexture(256, 128, "7日走势", "#fff", "40px Nexa Bold, PingFang SC");

@@ -119,12 +119,14 @@ function parseDate(str) {
   var y = str.substr(0, 4),
     m = str.substr(4, 2),
     d = str.substr(6, 2);
-  return new Date(y, m, d);
+  return new Date(y, m - 1, d);
 }
 
 function periodParser(p) {
   return [parseDate(p.split("|")[0]), parseDate(p.split("|")[1])];
 }
+
+global.periodParser = periodParser;
 
 function parseData() {
   var lst = data.protobuf.list;

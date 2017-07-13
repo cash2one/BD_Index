@@ -264,7 +264,9 @@ class trendy {
     ctx.strokeStyle = gradient;
     ctx.lineWidth = 6;
     ctx.lineCap = "round";
-    ctx.stroke();
+    if (this.visibility > 0.5) {
+      ctx.stroke();
+    }
     ctx.filter = "none";
     ctx.stroke();
     ctx.strokeStyle = col;
@@ -368,7 +370,16 @@ export function render() {
 }
 
 shared.events.on("data", d => {
+  var toInt = (v, i, a) => {
+    v = v == "" ? 0 : v;
+    var i = parseInt(v);
+    if (!Number.isFinite(i)) {
+      return 0;
+    }
+    return i;
+  };
   var proc = (v, i, a) => {
+    v = toInt(v, i, a);
     var x = i / a.length;
     var y = parseInt(v) / 100;
     var actualD = new Date(
