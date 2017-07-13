@@ -5,6 +5,7 @@ import "./assets.js"
 import * as d3 from "../node_modules/d3/index.js";
 import * as bg from "./fancybg.js";
 import * as trend from "./trend.js";
+import * as ui from "./ui.js"
 import { TweenLite } from "gsap";
 
 function render() {

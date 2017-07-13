@@ -1,10 +1,9 @@
-
-
 <html>
 
 <head>
     <meta charset="UTF-8">
     <script src='lib/glfx.js'></script>
+    <script src='node_modules/vue/dist/vue.min.js'></script>
     <script src='node_modules/three/build/three.js'></script>
     <script src='node_modules/three/examples/js/controls/OrbitControls.js'></script>
 
@@ -23,9 +22,19 @@
 
 <body>
 
+    <div id='vue-main'>
+        <div class='ui'>
+            <div v-on:click='setTab(0)' v-bind:class='{tabbtn : true, active: this.tab == 0}'>趋势研究</div>
+            <div v-on:click='setTab(1)' v-bind:class='{tabbtn : true, active: this.tab == 1}'>需求图谱</div>
+            <div v-on:click='setTab(2)' v-bind:class='{tabbtn : true, active: this.tab == 2}'>舆情洞察</div>
+            <div v-on:click='setTab(3)' v-bind:class='{tabbtn : true, active: this.tab == 3}'>人群画像</div>
+        </div>
+    </div>
+
     <webview partition='persist:baidu' id='view' src="http://index.baidu.com/" preload='injector.js' autosize></webview>
     <script src='src/electron-pipe.js'></script>
     <script src='dist/out.js'></script>
+
 
 </body>
 

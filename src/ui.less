@@ -1,0 +1,42 @@
+.ui {
+    font-family: 'Nexa Bold', 'PingFang SC';
+    font-size: 20px;
+    font-weight: normal;
+    position: absolute;
+    top: 60px;
+    color: white;
+    left: 60px;
+    .tabbtn {
+        display: inline-flex;
+        position: relative;
+        padding: 8px 20px;
+        margin: 10px;
+        cursor: pointer;
+        transform: none;
+        transition: all 0.5s ease;
+        background: linear-gradient(to top right, rgb(55, 171, 181) 0%, rgba(16, 186, 255, 0.26) 100%);
+        mix-blend-mode: hard-light;
+        &.active,
+        &:hover {
+            transform: translate(0px, -5px);
+            &::before {
+                opacity: 1;
+            }
+            background: linear-gradient(to bottom left, rgba(108, 234, 247, 0.69) 0%, rgba(37, 193, 255, 0.97) 100%);
+        }
+        &::before {
+            opacity: 0;
+            transition: opacity 0.5s ease;
+            display: block;
+            position: absolute;
+            height: 100%;
+            width: 100%;
+            content: " ";
+            background: rgba(108, 234, 247, 0.39);
+            top: 9px;
+            z-index: -1;
+            left: 9px;
+            filter: blur(15px);
+        }
+    }
+}

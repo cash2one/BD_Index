@@ -36,5 +36,25 @@ document.addEventListener("mousemove", e => {
     camera.position,
     mouse.vec.sub(camera.position).normalize()
   );
+});
 
+
+//UI Stuff & Bindings
+import "./ui.less";
+import $ from "jQuery";
+import * as shared from "./shared.js";
+
+export var data = {
+  tab: 0,
+  runtime: {}
+};
+var app = new Vue({
+  el: "#vue-main",
+  data: data,
+  methods: {
+    setTab: t => {
+      data.tab = t;
+      console.log(t);
+    }
+  }
 });
