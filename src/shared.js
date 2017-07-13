@@ -1,3 +1,6 @@
+import EventEmitter from "event-emitter";
+
+export var events = EventEmitter();
 export var scene = new THREE.Scene();
 scene.fog = new THREE.Fog(0x000, 50, 80);
 const TIME_OUT = 15000;
@@ -7,7 +10,6 @@ export var camera = new THREE.PerspectiveCamera(
   0.1,
   1000
 );
-//
 
 var light = new THREE.AmbientLight(0xffffff); // soft white light
 scene.add(light);
@@ -72,7 +74,10 @@ var app = new Vue({
           stage: 0,
           stages: ["trend", "demand", "sentiment", "crowd"],
           stage_req: [
-            ["Search/getAllIndex/", "Newwordgraph/getNewsByDateList/"],
+            [
+              "Search/getAllIndex/",
+              "Newwordgraph/getNewsByDateList/"
+            ],
             ["Newwordgraph/"],
             [
               "search/getNews/",
@@ -141,6 +146,7 @@ function parseData() {
     }
   }
   data.visual = d;
+  events.emit("data", data.visual);
 }
 
 function req() {
@@ -183,6 +189,7 @@ webview.addEventListener("ipc-message", function(e) {
       var d = e.args[0].d;
       if (d.data.code) {
       } else {
+        console.log(c.name);
         march(c.name, d, c);
         // console.log(d);
       }

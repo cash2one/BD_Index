@@ -25,8 +25,10 @@ class trendy {
   bindData(arr) {
     this.points = JSON.parse(JSON.stringify(arr));
     for (var p = 0; p < this.points.length; p++) {
+      this.points[p].x *= 0.9;
+      this.points[p].x += 0.05;
       this.points[p].x *= 1024 / this.SCALER;
-      this.points[p].y *= 1024 / this.SCALER;
+      this.points[p].y = 1024 - 256 - this.points[p].y * (512 / this.SCALER);
       this.points[p].sel = 0;
     }
   }
@@ -349,6 +351,28 @@ export function render() {
   trendAll.render();
   trendPC.render();
   trendMobile.render();
-  shared.camera.position.z =
-    CAM_BASE + 5 - 5 * state.visibility + state.selection * STEP;
+  // shared.camera.position.z =
+  //   CAM_BASE + 5 - 5 * state.visibility + state.selection * STEP;
 }
+
+shared.events.on("data", d => {
+  var proc = (v, i, a) => {
+    var x = i / a.length;
+    var y = parseInt(v) / 100;
+    var actualD = new Date(
+      new Date().getTime() - (a.length - 1 - i) * 100 * 24 * 60 * 60 * 1000
+    );
+    return {
+      x: x,
+      y: y,
+      q: parseInt(v) + "%",
+      d: actualD.getFullYear() + "-" + (actualD.getMonth() + 1)
+    };
+  };
+  var all = d["Search/getAllIndex/"].all[0].userIndexes_100.split(",").map(proc);
+  var pc = d["Search/getAllIndex/"].pc[0].userIndexes_100.split(",").map(proc);
+  var mob = d["Search/getAllIndex/"].wise[0].userIndexes_100.split(",").map(proc);
+  trendAll.bindData(all);
+  trendPC.bindData(pc);
+  trendMobile.bindData(mob);
+});
