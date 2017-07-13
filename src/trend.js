@@ -1,6 +1,6 @@
 import * as shared from "./shared.js";
 import { TweenLite, Bounce, Cubic, Quad, Expo } from "gsap";
-
+import { assets } from "./assets.js";
 global.state = {
   visibility: 1,
   selection: 0
@@ -22,14 +22,19 @@ global.selectState = x => {
 // );
 
 class trendy {
-  constructor(id) {
+  constructor(id, TEXT) {
     this.pt = [];
     this.canvas = document.createElement("canvas");
     this.SCALER = 1;
     this.id = id;
     this.visibility = 0;
     for (var i = 0.05; i < 0.95; i += 0.05) {
-      this.pt.push({ x: i, y: (Math.random() - 0.5) * 0.3 + 0.5 });
+      this.pt.push({
+        x: i,
+        y: (Math.random() - 0.5) * 0.3 + 0.5,
+        q: "30%",
+        d: "2017-7-12"
+      });
     }
     this.pt = JSON.stringify(this.pt);
     // document.querySelector("body").appendChild(canvas);
@@ -81,29 +86,79 @@ class trendy {
     this.bar = bar;
     this.QUAD.add(bar);
 
+    var btn = new THREE.Group();
+
     var geometry = new THREE.PlaneGeometry(6, 3);
     var mat = new THREE.MeshBasicMaterial({
       transparent: true,
-      vertexColors: THREE.VertexColors,
-      blending: THREE.AdditiveBlending
+      //   vertexColors: THREE.VertexColors,
+      blending: THREE.AdditiveBlending,
+      map: new THREE.CanvasTexture(assets[TEXT])
     });
+
+    var text = new THREE.Mesh(geometry, mat);
+    btn.add(text);
+
+    var mat = new THREE.MeshBasicMaterial({
+      transparent: true,
+      vertexColors: THREE.VertexColors,
+      blending: THREE.AdditiveBlending,
+      opacity: 0.5
+      //   map: new THREE.CanvasTexture(assets["trend-all"])
+    });
+
     geometry.faces[0].vertexColors[0] = new THREE.Color(0x0050a4);
     geometry.faces[0].vertexColors[1] = new THREE.Color(0x0050a4);
     geometry.faces[0].vertexColors[2] = new THREE.Color(0x4fa8b6);
     geometry.faces[1].vertexColors[0] = new THREE.Color(0x0050a4);
     geometry.faces[1].vertexColors[1] = new THREE.Color(0x0050a4);
     geometry.faces[1].vertexColors[2] = new THREE.Color(0x4fa8b6);
-    
-    var text = new THREE.Mesh(geometry, mat);
-    text.position.z = 3;
-    text.position.x = 13;
-    text.position.y = -10;
-    this.QUAD.add(text);
+
+    for (var i = 0; i < 1; i += 0.3) {
+      var mat = new THREE.MeshBasicMaterial({
+        transparent: true,
+        vertexColors: THREE.VertexColors,
+        blending: THREE.AdditiveBlending,
+        opacity: 0.3
+        //   map: new THREE.CanvasTexture(assets["trend-all"])
+      });
+      var bg = new THREE.Mesh(geometry, mat);
+      bg.position.z = -0.5 + i * 3;
+      btn.add(bg);
+    }
+
+    btn.position.z = 3;
+    btn.position.x = 13;
+    btn.position.y = -10;
+    this.tag = btn;
+    this.QUAD.add(btn);
   }
 
   render() {
     this.visibility =
       state.visibility * (1 - Math.min(1, Math.abs(this.id - state.selection)));
+
+    var intersection = null;
+    if (this.visibility && this.id == state.selection) {
+      var intersects = shared.mouse.raycaster.intersectObject(
+        this.QUAD.children[0],
+        true
+      );
+      if (intersects.length > 0) {
+        intersects[0].point.add(new THREE.Vector3(20, 20, 0));
+        intersects[0].point.multiplyScalar(1 / 40 * 1024, 1 / 40 * 1024);
+        intersection = intersects[0];
+      }
+    }
+
+    // this.tag.children[1].position.x = 5 - this.visibility * 5;
+    // this.tag.children[1].material.opacity = this.visibility * 0.5 + 0.5;
+    // this.tag.children[0].position.x = 5 - this.visibility * 5;
+    // this.tag.children[0].position.z = -(1-this.visibility) * 1.5;
+    for (var i = 1; i < this.tag.children.length; i++) {
+      this.tag.children[i].position.z = (-1.5 + i) * (this.visibility + 0.5);
+    }
+
     this.canvas.height = 1024 * this.SCALER;
     this.canvas.width = 1024 * this.SCALER;
     let ctx = this.ctx;
@@ -212,7 +267,6 @@ class trendy {
 
     //max
     ctx.globalCompositeOperation = "lighter";
-
     for (var i = 0; i < points.length; i++) {
       ctx.save();
       ctx.translate(points[i].x, points[i].y);
@@ -230,6 +284,7 @@ class trendy {
       ctx.closePath();
       ctx.restore();
     }
+
     ctx.restore();
     texture.needsUpdate = true;
   }
@@ -237,9 +292,9 @@ class trendy {
 
 var GROUP = new THREE.Group();
 
-var trendAll = new trendy(0);
-var trendPC = new trendy(1);
-var trendMobile = new trendy(2);
+var trendAll = new trendy(0, "trend-all");
+var trendPC = new trendy(1, "trend-pc");
+var trendMobile = new trendy(2, "trend-mob");
 
 shared.scene.add(GROUP);
 GROUP.add(trendAll.QUAD);

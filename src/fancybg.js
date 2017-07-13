@@ -1,6 +1,8 @@
 import * as three from "three";
-import * as shared from "./shared.js"
+import * as shared from "./shared.js";
 import { MeshLine, MeshLineMaterial } from "three.meshline";
+import * as fieldfx from "./fieldfx.js";
+
 global.CAM_BASE = 30;
 // init renderer
 var renderer = new THREE.WebGLRenderer({
@@ -157,5 +159,6 @@ export function render() {
     cur.scale.y = blend * 0.1 + 0.3;
     cur.needsUpdate = true;
   }
+  fieldfx.update();
   renderer.render(scene, camera);
 }

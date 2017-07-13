@@ -13,9 +13,10 @@ global.gotoTab = gotoTab;
 webview.addEventListener("did-finish-load", () => {
   console.log("Resource Loaded..");
   // webview.openDevTools();
+  
 });
 
-var state = {};
+var _state = {};
 
 webview.addEventListener("ipc-message", e => {
   switch (e.channel) {
@@ -31,7 +32,7 @@ webview.addEventListener("ipc-message", e => {
     case "state":
       console.log("state updated");
       console.log(e.args[0]);
-      state = e.args[0];
+      _state = e.args[0];
       break;
     case "loaded":
       console.log("inner page loaded");

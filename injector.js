@@ -54,9 +54,11 @@ function checkStatus() {
   } else {
     state.state = STATE_OK;
   }
-
   state.word = word;
   state.tab = tab;
-
   return state;
 }
+
+
+
+window.requestAnimationFrame = null;
