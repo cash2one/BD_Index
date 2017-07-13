@@ -1,6 +1,6 @@
 export var scene = new THREE.Scene();
 scene.fog = new THREE.Fog(0x000, 50, 80);
-
+const TIME_OUT = 15000;
 export var camera = new THREE.PerspectiveCamera(
   60,
   window.innerWidth / window.innerHeight,
@@ -48,6 +48,7 @@ export var data = {
   runtime: {
     state: 0
   },
+  visual: {},
   protobuf: {},
   purposedWord: "",
   loading: false,
@@ -84,11 +85,25 @@ var app = new Vue({
         };
         data.statusMessage = "数据加载中...";
         data.loading = true;
+        setWatch();
         req();
       }
     }
   }
 });
+
+var watch;
+function setWatch() {
+  cancelWatch();
+  watch = setTimeout(function() {
+    data.statusMessage = "网络故障 超时";
+    data.loading = false;
+  }, TIME_OUT);
+}
+
+function cancelWatch() {
+  clearTimeout(watch);
+}
 
 function parseDate(str) {
   var y = str.substr(0, 4),
@@ -124,7 +139,7 @@ function parseData() {
         : lst[i].data.data;
     }
   }
-  console.log(Object.keys(d));
+  data.visual = d;
 }
 
 function req() {
@@ -132,7 +147,7 @@ function req() {
   gotoTab(data.protobuf.stages[data.protobuf.stage], data.purposedWord);
 }
 function march(path, d, c) {
-  if (data.protobuf.stage > 3) return; //malfunction
+  if (data.protobuf.stage > 3 || !data.loading) return; //malfunction
   var cur = data.protobuf.stage_req[data.protobuf.stage];
   var i = cur.indexOf(path);
   if (i < 0) {
@@ -149,6 +164,7 @@ function march(path, d, c) {
     if (data.protobuf.stage >= 3) {
       data.loading = false;
       data.statusMessage = "已加载";
+      cancelWatch();
       parseData();
     } else {
       data.protobuf.stage++;
