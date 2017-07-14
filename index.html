@@ -29,6 +29,9 @@
                 <div class='message'>
                     {{statusMessage}}
                 </div>
+                <div class='logout message' v-on:click='ll'>
+                    logout
+                </div>
             </div>
             <div class='tabs'>
                 <div v-on:click='setTab(0)' v-bind:class='{tabbtn : true, active: this.tab == 0}'>趋势研究</div>

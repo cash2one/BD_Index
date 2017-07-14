@@ -12,6 +12,10 @@ function gotoTab(tab, keyword) {
 
 global.gotoTab = gotoTab;
 
+global.logout = function() {
+  webview.loadURL("https://passport.baidu.com/?logout");
+}
+
 webview.addEventListener("dom-ready", () => {
   console.log("Resource Loaded..");
   // webview.openDevTools();

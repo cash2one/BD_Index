@@ -88,6 +88,9 @@ var app = new Vue({
     setTab: t => {
       data.tab = t;
     },
+    ll: t=>{
+      logout();
+    },
     trySearch: e => {
       if (e.code == "Enter" && !data.loading) {
         //
@@ -236,6 +239,7 @@ webview.addEventListener("ipc-message", function(e) {
         // document.querySelector("webview").classList.add("render");
         // remote.getCurrentWindow().loadUrl("./#login")
         if (window.location.search.indexOf("reload") < 0) {
+          alert("请重新登陆");
           electron.ipcRenderer.send("reload", "reload");
         }
       } else if (s.state == 0) {
@@ -258,7 +262,6 @@ window.addEventListener("load", function() {
     //alright ok
     document.querySelector("webview").style.visibility = "collapse";
   } else {
-    alert("请进行登录操作");
     document.querySelector("webview").classList.add("render");
   }
 });
