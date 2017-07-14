@@ -2,7 +2,11 @@ import * as shared from "./shared.js";
 import { TweenLite, Bounce, Cubic, Quad, Expo } from "gsap";
 import { assets } from "./assets.js";
 import * as mapjson from "./map-lowres.json";
-
+var state = {
+  visibility: 0,
+  visibilityX: 0,
+  selection: 0
+};
 var cities = [
   "911,北京,514,北京",
   "910,上海,57,上海",
@@ -65,7 +69,16 @@ var map = mapjson.map;
 var GROUP = new THREE.Group();
 var prov = {};
 class province {
-  constructor() {
+  constructor(name) {
+    this.canvas = document.createElement("canvas");
+    // document.body.appendChild(this.canvas);
+    this.canvas.width = 512;
+    this.canvas.height = 128;
+    this.ctx = this.canvas.getContext("2d");
+    this.ctx.font = "40px Nexa Bold, PingFang SC";
+    this.ctx.textBaseline = "middle";
+    this.ctx.textAlign = "center";
+    this.name = name;
     this.PROV = new THREE.Group();
     this.points = [];
     this.PSYS = new THREE.Geometry();
@@ -73,26 +86,61 @@ class province {
     this.PMAT = new THREE.PointsMaterial({
       sizeAttenuation: true,
       size: 0.2,
-      color: 0xffffff,
+      color: new THREE.Color().setHSL(
+        0.55,
+        Math.random() * 0.3 + 0.5,
+        Math.random() * 0.3 + 0.2
+      ),
       transparent: true,
       blending: THREE.AdditiveBlending,
-      opacity: 0.1
+      opacity: 0.7
     });
     this.PMAT_Shadow = new THREE.PointsMaterial({
       sizeAttenuation: true,
       size: 0.1,
       blending: THREE.AdditiveBlending,
-      color: 0xffffff,
+      vertexColors: THREE.VertexColors,
       transparent: true,
-      opacity: 0.5
+      opacity: 1
     });
     this.z = Math.random();
+
     GROUP.add(this.PROV);
   }
 
   render() {
-    this.PS.position.z = this.z * 5;
+    var z = this.z * state.visibilityX;
+    this.PS.position.z = -1;
+    this.TUBE.scale.z = this.TUBESHINE.scale.z = z * 14;
+    this.TUBE.position.z = this.TUBESHINE.position.z = z * 14 / 2;
+    this.TUBEMAT.opacity = 1;
+    this.TUBEMAT.color.setHSL(0.56, 0.8, z);
+    this.TUBE.visible = z > 0.1;
+    this.TUBESHINE.visible = z > 0.1;
+    this.TUBEMATSHINE.opacity = 0.1;
+    this.LABEL.position.z = z * 15;
+
+    //check collision
+    var intersects = shared.mouse.raycaster.intersectObject(
+      this.TUBESHINE,
+      true
+    );
+    if (intersects.length > 0) {
+      shared.data.toolTip = this.name + "<br>" + Math.round(this.z * 1000);
+      this.TUBEMATSHINE.opacity = 1;
+    }
+    for (var i = 0; i < this.PSYS_Shadow.vertices.length; i++) {
+      var v = this.PSYS_Shadow.vertices[i];
+      var x = v.x;
+      var y = v.y;
+      var sc = Math.round(noise.perlin3(x / 5, y / 5, t / 3) * 5) / 5;
+      v.z = sc * 0.5 + 1;
+      this.PSYS_Shadow.colors[i].setHSL(0.56, sc + 0.3, sc + 0.5);
+    }
+    this.PS.geometry.colorsNeedUpdate = true;
+    this.PS.geometry.verticesNeedUpdate = true;
   }
+
   pushPoint(pt) {
     // var mat = new THREE.MeshBasicMaterial({
     //   color: 0xf0f0f0,
@@ -103,19 +151,91 @@ class province {
     // mesh.position.x = (pt.x / 1080 - 0.5) * 30;
     // mesh.position.y = (0.5 - pt.y / 1080) * 30;
     // this.PROV.add(mesh);
+
     this.PSYS.vertices.push(
-      new THREE.Vector3((pt.x / 1080 - 0.5) * 30, (0.5 - pt.y / 1080) * 30, -15)
+      new THREE.Vector3((pt.x / 1080 - 0.5) * 30, (0.5 - pt.y / 1080) * 30, 0)
     );
     this.PSYS_Shadow.vertices.push(
-      new THREE.Vector3((pt.x / 1080 - 0.5) * 30, (0.5 - pt.y / 1080) * 30, -15)
+      new THREE.Vector3((pt.x / 1080 - 0.5) * 30, (0.5 - pt.y / 1080) * 30, 0)
     );
+    this.PSYS_Shadow.colors.push(new THREE.Color(1, 1, 1));
   }
 
   bindData(d) {
-    this.z = d;
+    TweenLite.to(this, 5, {
+      z: d
+    });
+    // console.log(d);
+    this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+    this.ctx.fillStyle = "#fff";
+    // this.ctx.fillRect(0, 0, 256, 256);
+    this.ctx.fillText(this.name, this.canvas.width / 2, this.canvas.height / 2 - 30);
+    this.ctx.fillText(Math.round(d * 1000), this.canvas.width / 2, this.canvas.height / 2 + 30);
+    this.LABELTEXTURE.needsUpdate = true;
   }
 
   show() {
+    //rough center pt
+    var x = 0;
+    var y = 0;
+    for (var v = 0; v < this.PSYS.vertices.length; v++) {
+      x += this.PSYS.vertices[v].x;
+      y += this.PSYS.vertices[v].y;
+    }
+    x /= this.PSYS.vertices.length;
+    y /= this.PSYS.vertices.length;
+
+    this.TUBEGEO = new THREE.BoxGeometry(0.15, 0.15, 1);
+    this.TUBEMAT = new THREE.MeshLambertMaterial({
+      color: 0xffffff, //0x0fa9ff
+      transparent: true,
+      side: THREE.DoubleSide,
+      opacity: 0.3
+      // blending: THREE.AdditiveBlending
+    });
+    this.TUBE = new THREE.Mesh(this.TUBEGEO, this.TUBEMAT);
+    this.PROV.add(this.TUBE);
+
+    this.TUBEGEOSHINE = new THREE.BoxGeometry(0.6, 0.6, 1.1);
+    this.TUBEMATSHINE = new THREE.MeshLambertMaterial({
+      color: 0x0fa9ff,
+      transparent: true,
+      side: THREE.DoubleSide,
+      opacity: 0.1,
+      blending: THREE.AdditiveBlending
+    });
+    this.TUBESHINE = new THREE.Mesh(this.TUBEGEOSHINE, this.TUBEMATSHINE);
+    this.PROV.add(this.TUBE);
+    this.PROV.add(this.TUBESHINE);
+
+
+    this.LABELGEO = new THREE.PlaneGeometry(5.12, 1.28);
+    this.LABELTEXTURE = new THREE.CanvasTexture(this.canvas);
+    this.LABELMAT = new THREE.MeshBasicMaterial({
+      // color: 0xffffff,
+      map: this.LABELTEXTURE,
+      side: THREE.DoubleSide,
+      depthTest: false,
+      transparent: true,
+      opacity: 0.8,
+      blend: THREE.AdditiveBlending
+    });
+    this.LABEL = new THREE.Mesh(this.LABELGEO, this.LABELMAT);
+    this.PROV.add(this.LABEL);
+
+
+    this.LABEL.position.x = x;
+    this.LABEL.position.y = y;
+    this.LABEL.position.z = 0.5;
+
+    this.TUBE.position.x = x;
+    this.TUBE.position.y = y;
+    this.TUBE.position.z = 0;
+
+    this.TUBESHINE.position.x = x;
+    this.TUBESHINE.position.y = y;
+    this.TUBESHINE.position.z = 0;
+
     this.P = new THREE.Points(this.PSYS, this.PMAT);
     this.PS = new THREE.Points(this.PSYS_Shadow, this.PMAT_Shadow);
     this.PROV.add(this.P);
@@ -128,7 +248,7 @@ function buildMap() {
     // console.log(i);
     var owner = provMap[map[i].id].id;
     if (!prov[owner]) {
-      prov[owner] = new province();
+      prov[owner] = new province(provMap[map[i].id].name);
     }
     var cur = prov[owner];
     cur.pushPoint(map[i]);
@@ -139,21 +259,40 @@ function buildMap() {
 }
 
 export function render() {
+  TweenLite.to(state, 0.5, { visibility: shared.data.tab == 3 ? 1 : 0 });
+  TweenLite.to(state, 2, { visibilityX: shared.data.tab == 3 ? 1 : 0 });
+  GROUP.visible = state.visibility < 0.1 ? 0 : 1;
+  if (state.visibility < 0.2) return;
+  shared.data.toolTip = "";
+  GROUP.position.z = 50 - state.visibility * 50;
   for (var i in prov) {
     prov[i].render();
   }
+  GROUP.rotation.y = -shared.mouse.vec.x;
+  GROUP.rotation.x = shared.mouse.vec.y;
+  shared.camera.position.z = CAM_BASE + 5 - 5 * state.visibility; // + state.selection * STEP;
 }
 
 shared.events.on("data", d => {
   var provs = d["Region/getRegion/"].region[0].prov_real;
-  for(var i in provs) {
-    var data = parseFloat(provs[i]) / 1000;
-    console.log(i);
-    prov[i].bindData(data);
+  for (var i in prov) {
+    if (prov[i]) {
+      prov[i].bindData(0);
+    }
+  }
+  for (var i in provs) {
+    var data = Math.sqrt(parseFloat(provs[i]) / 1000);
+    if (prov[i]) {
+      prov[i].bindData(data);
+    }
   }
 });
 
 shared.scene.add(GROUP);
 
 buildMap();
-console.log(Object.keys(prov));
+// console.log(Object.keys(prov));
+
+for (var i in prov) {
+  prov[i].bindData(0);
+}
