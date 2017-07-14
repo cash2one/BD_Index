@@ -2,8 +2,8 @@ const electron = require("electron");
 const app = electron.app;
 const session = electron.session;
 const BrowserWindow = electron.BrowserWindow;
-const express = require('express');
-const serveStatic = require('serve-static');
+const express = require("express");
+const serveStatic = require("serve-static");
 
 const path = require("path");
 const url = require("url");
@@ -17,26 +17,32 @@ function createWindow() {
     title: "Baidu Index - Injector"
   });
 
-  const ses = session.fromPartition('persist:baidu')
-  ses.setProxy({
-    pacScript: url.format({
-      pathname: path.join(__dirname, "proxy.pac"),
-      protocol: "file:",
-      slashes: true
-    })
-  }, () =>{
-      console.log(';done;');
-  })
-
-  mainWindow.loadURL(
-    url.format({
+  const ses = session.fromPartition("persist:baidu");
+  ses.setProxy(
+    {
+      pacScript: url.format({
+        pathname: path.join(__dirname, "proxy.pac"),
+        protocol: "file:",
+        slashes: true
+      })
+    },
+    () => {
+      console.log(";done;");
+    }
+  );
+  var p =  url.format({
       pathname: path.join(__dirname, "index.html"),
       protocol: "file:",
       slashes: true
-    })
+    });
+  mainWindow.loadURL(
+    p
   );
+  electron.ipcMain.on("reload", (url, d) => {
+    mainWindow.loadURL(p + "?" + d);
+  });
   // Open the DevTools.
-  mainWindow.webContents.openDevTools()
+  // mainWindow.webContents.openDevTools()
   mainWindow.on("closed", function() {
     mainWindow = null;
   });
@@ -49,10 +55,9 @@ app.on("window-all-closed", function() {
   app.quit();
 });
 
-
 var expapp = express();
 // expapp.use(serveStatic(__dirname + "/proxy"));
 expapp.get("/static/js/funs.js", (req, res) => {
-    res.sendFile(__dirname + "/proxy/funs.js");
+  res.sendFile(__dirname + "/proxy/funs.js");
 });
 expapp.listen(8899);

@@ -221,16 +221,28 @@ webview.addEventListener("ipc-message", function(e) {
       // console.log(e.args[0]);
       var s = e.args[0];
       if (s.state == 1) {
+        document.querySelector("webview").classList.remove("render");
+        document.querySelector("webview").style.visibility = "collapse";
         //good..
       } else if (s.state == -2) {
         data.loading = false;
         data.statusMessage = "* 关键词暂未收录 *";
+        document.querySelector("webview").classList.remove("render");
+        document.querySelector("webview").style.visibility = "collapse";
       } else if (s.state == -1) {
         data.loading = false;
         data.statusMessage = "* 需重新登陆 *";
+        // window.location.href = "./#login";
+        // document.querySelector("webview").classList.add("render");
+        // remote.getCurrentWindow().loadUrl("./#login")
+        if (window.location.search.indexOf("reload") < 0) {
+          electron.ipcRenderer.send("reload", "reload");
+        }
       } else if (s.state == 0) {
         data.loading = false;
         data.statusMessage = "无数据";
+        document.querySelector("webview").classList.remove("render");
+        document.querySelector("webview").style.visibility = "collapse";
       }
       data.runtime.state = s.state;
       // _state = e.args[0];
@@ -238,5 +250,15 @@ webview.addEventListener("ipc-message", function(e) {
     // case "loaded":
     //   console.log("inner page loaded");
     //   break;
+  }
+});
+
+window.addEventListener("load", function() {
+  if (window.location.search.indexOf("reload") < 0) {
+    //alright ok
+    document.querySelector("webview").style.visibility = "collapse";
+  } else {
+    alert("请进行登录操作");
+    document.querySelector("webview").classList.add("render");
   }
 });

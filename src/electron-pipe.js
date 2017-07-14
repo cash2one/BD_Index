@@ -1,3 +1,5 @@
+var electron = require('electron');
+
 var urlencode = require("urlencode");
 
 var webview = document.getElementById("view");

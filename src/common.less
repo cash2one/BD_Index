@@ -50,18 +50,19 @@ webview {
     pointer-events: none;
     opacity: 1;
     transform: translate(0%, -100%);
-    z-index: 9999;
     display: inline-flex;
     // visibility: collapse;
     transition: transform 0.5s ease;
     width: 0%;
     height: 0%; // display: none; 
+
 }
 
 #view.render {
     display: inline-flex;
-    // visibility: visible;
+    visibility: visible;
     width: 100%;
+    z-index: 99999999;
     height: 100%; // display: none; 
     transform: translate(0%, 0%);
     pointer-events: all;
