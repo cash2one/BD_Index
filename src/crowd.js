@@ -2,10 +2,23 @@ import * as shared from "./shared.js";
 import { TweenLite, Bounce, Cubic, Quad, Expo } from "gsap";
 import { assets } from "./assets.js";
 import * as mapjson from "./map-lowres.json";
+
+var age = ["~19岁", "20~29岁", "30~39岁", "40~49岁", "50岁~"];
 var state = {
   visibility: 0,
   visibilityX: 0,
-  selection: 0
+  selection: 0,
+  genderData: {
+    m: 0,
+    f: 0
+  },
+  ageData: {
+    "1": 0,
+    "2": 0,
+    "3": 0,
+    "4": 0,
+    "5": 0
+  }
 };
 var cities = [
   "911,北京,514,北京",
@@ -169,8 +182,16 @@ class province {
     this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
     this.ctx.fillStyle = "#fff";
     // this.ctx.fillRect(0, 0, 256, 256);
-    this.ctx.fillText(this.name, this.canvas.width / 2, this.canvas.height / 2 - 30);
-    this.ctx.fillText(Math.round(d * 1000), this.canvas.width / 2, this.canvas.height / 2 + 30);
+    this.ctx.fillText(
+      this.name,
+      this.canvas.width / 2,
+      this.canvas.height / 2 - 30
+    );
+    this.ctx.fillText(
+      Math.round(d * 1000),
+      this.canvas.width / 2,
+      this.canvas.height / 2 + 30
+    );
     this.LABELTEXTURE.needsUpdate = true;
   }
 
@@ -208,7 +229,6 @@ class province {
     this.PROV.add(this.TUBE);
     this.PROV.add(this.TUBESHINE);
 
-
     this.LABELGEO = new THREE.PlaneGeometry(5.12, 1.28);
     this.LABELTEXTURE = new THREE.CanvasTexture(this.canvas);
     this.LABELMAT = new THREE.MeshBasicMaterial({
@@ -218,11 +238,10 @@ class province {
       depthTest: false,
       transparent: true,
       opacity: 0.8,
-      blend: THREE.AdditiveBlending
+      blending: THREE.AdditiveBlending
     });
     this.LABEL = new THREE.Mesh(this.LABELGEO, this.LABELMAT);
     this.PROV.add(this.LABEL);
-
 
     this.LABEL.position.x = x;
     this.LABEL.position.y = y;
@@ -258,18 +277,164 @@ function buildMap() {
   }
 }
 
+var canvas = document.createElement("canvas");
+canvas.width = 512;
+canvas.height = 512;
+var ctx = canvas.getContext("2d");
+var GENDERRINGTEXTURE = new THREE.CanvasTexture(canvas);
+var GENDERRINGMAT = new THREE.MeshBasicMaterial({
+  map: GENDERRINGTEXTURE,
+  transparent: true,
+  depthTest: false,
+  blending: THREE.AdditiveBlending
+});
+var GENDERRINGGEO = new THREE.PlaneGeometry(12, 12);
+var GENDERRING = new THREE.Mesh(GENDERRINGGEO, GENDERRINGMAT);
+GENDERRING.position.z = 3;
+GENDERRING.position.y = -8;
+GENDERRING.position.x = -12;
+GROUP.add(GENDERRING);
+function renderGenderRing() {
+  ctx.textAlign = "center";
+  ctx.textBaseline = "middle";
+  ctx.font = "18px Nexa Bold, PingFang SC";
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  ctx.lineCap = "round";
+  // ctx.fillRect(0, 0, 300, 300);
+  ctx.save();
+  ctx.translate(canvas.width / 2, canvas.height / 2);
+  ctx.beginPath();
+  ctx.lineWidth = 15;
+  ctx.arc(0, 0, 100, 0, Math.PI * 2);
+  ctx.strokeStyle = "rgba(40,0,40,0.9)";
+  ctx.stroke();
+  ctx.closePath();
+  ctx.beginPath();
+  ctx.lineWidth = 30;
+  ctx.arc(0, 0, 100, 0 - 0.3, Math.PI * 2 * state.genderData.f - 0.3);
+  ctx.strokeStyle = "rgba(235,10,220,1)";
+  ctx.stroke();
+  ctx.closePath();
+
+  //draw label
+  var deg = Math.PI * 2 * state.genderData.f - 0.3;
+  var rmin = 170;
+  var rmax = 200;
+  var ax = Math.cos(deg);
+  var ay = Math.sin(deg);
+
+  ctx.strokeStyle = "rgba(235,10,220,1)";
+  ctx.lineWidth = 3;
+  ctx.beginPath();
+  ctx.moveTo(ax * rmin, ay * rmin);
+  ctx.lineTo(ax * rmax, ay * rmax);
+  ctx.stroke();
+  ctx.closePath();
+
+  ctx.fillStyle = "#fff";
+  ctx.fillText("女性", ax * (rmax + 30), ay * (rmax + 30) - 10);
+  ctx.fillText(
+    Math.round(state.genderData.f * 100) + "%",
+    ax * (rmax + 30),
+    ay * (rmax + 30) + 10
+  );
+
+  ctx.beginPath();
+  ctx.lineWidth = 15;
+  ctx.strokeStyle = "rgba(0,0,40,0.9)";
+  ctx.arc(0, 0, 140, 0, Math.PI * 2);
+  ctx.stroke();
+  ctx.closePath();
+  ctx.beginPath();
+  ctx.lineWidth = 30;
+  ctx.strokeStyle = "rgba(0,130,255,1)";
+  ctx.arc(0, 0, 140, 0 - 0.6, Math.PI * 2 * state.genderData.m - 0.6);
+  ctx.stroke();
+  ctx.closePath();
+
+  //draw label2
+  deg = Math.PI * 2 * state.genderData.m - 0.6;
+  ax = Math.cos(deg);
+  ay = Math.sin(deg);
+
+  ctx.strokeStyle = "rgba(0,130,255,1)";
+  ctx.lineWidth = 3;
+  ctx.beginPath();
+  ctx.moveTo(ax * rmin, ay * rmin);
+  ctx.lineTo(ax * rmax, ay * rmax);
+  ctx.stroke();
+  ctx.closePath();
+
+  ctx.fillStyle = "#fff";
+  ctx.fillText("男性", ax * (rmax + 30), ay * (rmax + 30) - 10);
+  ctx.fillText(
+    Math.round(state.genderData.m * 100) + "%",
+    ax * (rmax + 30),
+    ay * (rmax + 30) + 10
+  );
+
+  ctx.restore();
+
+  GENDERRINGTEXTURE.needsUpdate = true;
+}
+
+var canvas2 = document.createElement("canvas");
+canvas2.width = 512;
+canvas2.height = 256;
+var ctx2 = canvas2.getContext("2d");
+var AGEMAPTEXTURE = new THREE.CanvasTexture(canvas2);
+var AGEMAPMAT = new THREE.MeshBasicMaterial({
+  map: AGEMAPTEXTURE,
+  transparent: true,
+  depthTest: false,
+  blending: THREE.AdditiveBlending
+});
+var AGEMAPGEO = new THREE.PlaneGeometry(12, 6);
+var AGEMAP = new THREE.Mesh(AGEMAPGEO, AGEMAPMAT);
+AGEMAP.position.z = 3;
+AGEMAP.position.y = -8 - 1;
+AGEMAP.position.x = 12;
+GROUP.add(AGEMAP);
+var gradient = ctx2.createLinearGradient(0, 0, 0, canvas2.height);
+gradient.addColorStop(1, "#ffe");
+gradient.addColorStop(0, "#f00");
+function renderAgeMap() {
+  ctx2.textAlign = "center";
+  ctx2.textBaseline = "middle";
+  ctx2.clearRect(0, 0, canvas2.width, canvas2.height);
+  ctx2.save();
+  var tt = canvas2.height - 60;
+  for (var x = 1; x <= 5; x++) {
+    var h = state.ageData[x + ""];
+    ctx2.fillStyle = gradient;
+    ctx2.fillRect(0, (1 - h) * tt, 60, h * tt);
+    ctx2.fillStyle = "#fff";
+    ctx2.font = "18px Nexa Bold, PingFang SC";
+    ctx2.fillText(Math.round(h * 100) + "%", 30, (1 - h) * tt - 30);
+    ctx2.font = "15px Nexa Bold, PingFang SC";
+    ctx2.fillText(age[x - 1], 30, canvas2.height - 30);
+    ctx2.translate(80, 0);
+  }
+  ctx2.restore();
+  AGEMAPTEXTURE.needsUpdate = true;
+}
+
 export function render() {
   TweenLite.to(state, 0.5, { visibility: shared.data.tab == 3 ? 1 : 0 });
   TweenLite.to(state, 2, { visibilityX: shared.data.tab == 3 ? 1 : 0 });
   GROUP.visible = state.visibility < 0.1 ? 0 : 1;
   if (state.visibility < 0.2) return;
+  renderGenderRing();
+  renderAgeMap();
   shared.data.toolTip = "";
   GROUP.position.z = 50 - state.visibility * 50;
   for (var i in prov) {
     prov[i].render();
   }
-  GROUP.rotation.y = -shared.mouse.vec.x;
-  GROUP.rotation.x = shared.mouse.vec.y;
+  TweenLite.to(GROUP.rotation, 0.5, {
+    y: -shared.mouse.vec.x,
+    x: shared.mouse.vec.y
+  });
   shared.camera.position.z = CAM_BASE + 5 - 5 * state.visibility; // + state.selection * STEP;
 }
 
@@ -286,6 +451,19 @@ shared.events.on("data", d => {
       prov[i].bindData(data);
     }
   }
+  // console.log(JSON.stringify(d["Social/getSocial/"]));
+  TweenLite.to(state.genderData, 3, {
+    f: parseInt(d["Social/getSocial/"].str_sex.F) / 100,
+    m: parseInt(d["Social/getSocial/"].str_sex.M) / 100
+  });
+  TweenLite.to(state.ageData, 3, {
+    1: parseInt(d["Social/getSocial/"].str_age["1"]) / 100,
+    2: parseInt(d["Social/getSocial/"].str_age["2"]) / 100,
+    3: parseInt(d["Social/getSocial/"].str_age["3"]) / 100,
+    4: parseInt(d["Social/getSocial/"].str_age["4"]) / 100,
+    5: parseInt(d["Social/getSocial/"].str_age["5"]) / 100
+  });
+
 });
 
 shared.scene.add(GROUP);

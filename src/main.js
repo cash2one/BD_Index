@@ -4,6 +4,7 @@ import "./assets.js"
 
 import * as d3 from "../node_modules/d3/index.js";
 import * as bg from "./fancybg.js";
+import * as demand from "./demand.js";
 import * as trend from "./trend.js";
 import * as crowd from "./crowd.js";
 import * as sentiment from "./sentiment.js";
@@ -15,6 +16,7 @@ function render() {
   global.t = t;
   trend.render();
   crowd.render();
+  demand.render();
   sentiment.render();
   bg.render();
   shared.render();
