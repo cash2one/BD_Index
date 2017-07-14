@@ -88,7 +88,7 @@ var app = new Vue({
     setTab: t => {
       data.tab = t;
     },
-    ll: t=>{
+    ll: t => {
       logout();
     },
     trySearch: e => {
@@ -226,12 +226,14 @@ webview.addEventListener("ipc-message", function(e) {
       if (s.state == 1) {
         document.querySelector("webview").classList.remove("render");
         document.querySelector("webview").style.visibility = "collapse";
+        reloadIfNes();
         //good..
       } else if (s.state == -2) {
         data.loading = false;
         data.statusMessage = "* 关键词暂未收录 *";
         document.querySelector("webview").classList.remove("render");
         document.querySelector("webview").style.visibility = "collapse";
+        reloadIfNes();
       } else if (s.state == -1) {
         data.loading = false;
         data.statusMessage = "* 需重新登陆 *";
@@ -247,6 +249,7 @@ webview.addEventListener("ipc-message", function(e) {
         data.statusMessage = "无数据";
         document.querySelector("webview").classList.remove("render");
         document.querySelector("webview").style.visibility = "collapse";
+        reloadIfNes();
       }
       data.runtime.state = s.state;
       // _state = e.args[0];
@@ -256,6 +259,12 @@ webview.addEventListener("ipc-message", function(e) {
     //   break;
   }
 });
+
+function reloadIfNes() {
+  if (window.location.search.indexOf("reload") >= 0) {
+    electron.ipcRenderer.send("reload", "good");
+  }
+}
 
 window.addEventListener("load", function() {
   if (window.location.search.indexOf("reload") < 0) {
