@@ -46,6 +46,9 @@ document.addEventListener("mousemove", e => {
     camera.position,
     mouse.vec.sub(camera.position).normalize()
   );
+
+  var float = document.getElementById("floater") ;
+  float.style.transform = `translate(${mouse.x + 2}px, ${mouse.y + 2}px)`;
 });
 
 //UI Stuff & Bindings
@@ -62,7 +65,8 @@ export var data = {
   protobuf: {},
   purposedWord: "",
   loading: false,
-  statusMessage: "已加载"
+  statusMessage: "已加载",
+  toolTip: ""
 };
 
 var app = new Vue({

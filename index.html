@@ -36,6 +36,11 @@
                 <div v-on:click='setTab(2)' v-bind:class='{tabbtn : true, active: this.tab == 2}'>舆情洞察</div>
                 <div v-on:click='setTab(3)' v-bind:class='{tabbtn : true, active: this.tab == 3}'>人群画像</div>
             </div>
+
+        </div>
+
+        <div id='floater' v-html="toolTip" v-bind:class="{'floater' : true, 'hidden' : !toolTip} ">
+            
         </div>
     </div>
 

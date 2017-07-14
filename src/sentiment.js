@@ -16,11 +16,11 @@ var selectState = x => {
 class trendy {
   bindData(arr) {
     var mat = new THREE.MeshBasicMaterial({
-        color: new THREE.Color(0xaabbff),
-        side: THREE.DoubleSide,
-        transparent: true,
-        opacity: .1,
-        blending: THREE.AdditiveBlending
+      color: new THREE.Color(0xaabbff),
+      side: THREE.DoubleSide,
+      transparent: true,
+      opacity: 0.1,
+      blending: THREE.AdditiveBlending
     });
     var plane = new THREE.PlaneGeometry(10, 10);
 
@@ -29,19 +29,16 @@ class trendy {
     }
     this.points = JSON.parse(JSON.stringify(arr));
     for (var p = 0; p < this.points.length; p++) {
-
-
       this.points[p].x *= 0.9;
       this.points[p].x += 0.05;
 
-
       if (this.SLICES && this.points[p].obj != undefined) {
-          var mesh = new THREE.Mesh(plane, mat);
-          this.SLICES.add(mesh);
-          mesh.position.x = (this.points[p].x - 0.5) * 40;
-          mesh.position.y = -10;
-          mesh.position.z = -5;
-          mesh.rotation.y = Math.PI  / 2;
+        var mesh = new THREE.Mesh(plane, mat);
+        this.SLICES.add(mesh);
+        mesh.position.x = (this.points[p].x - 0.5) * 40;
+        mesh.position.y = -10;
+        mesh.position.z = -5;
+        mesh.rotation.y = Math.PI / 2;
       }
 
       this.points[p].x *= 1024 / this.SCALER;
@@ -58,13 +55,13 @@ class trendy {
         y: (Math.random() - 0.5) * 0.3 + 0.5,
         q: "30%",
         d: "2017-7-12",
-        obj: { }
+        obj: {}
       });
     }
     return pt;
   }
 
-  constructor(id, TEXT) {
+  constructor(id, TEXT, omitData) {
     this.canvas = document.createElement("canvas");
     this.SCALER = 1;
     this.id = id;
@@ -86,9 +83,10 @@ class trendy {
     this.textureMesh = new THREE.Mesh(this.geometry, this.material);
     this.QUAD = new THREE.Group();
     this.QUAD.add(this.textureMesh);
-
-    this.SLICES = new THREE.Group();
-    this.QUAD.add(this.SLICES);
+    if (!omitData) {
+      this.SLICES = new THREE.Group();
+      this.QUAD.add(this.SLICES);
+    }
     this.managedLines = [];
     for (var x = -20 + 5; x < 20; x += 5) {
       var geometry = new THREE.Geometry();
@@ -297,10 +295,12 @@ class trendy {
     for (var i = 0; i < points.length; i++) {
       var selected =
         intersection &&
-        (points[i].x - intersection.x) * (points[i].x - intersection.x) +
-          (points[i].y - intersection.y) * (points[i].y - intersection.y) <
-          200;
+        (points[i].x - intersection.x) * (points[i].x - intersection.x) <
+          100;
       var j = points[i];
+      if (selected && points[i].obj) {
+        shared.data.toolTip = points[i].obj.title;
+      }
       TweenLite.to(j, 0.5, {
         sel: selected ? 1 : 0
       });
@@ -327,7 +327,7 @@ class trendy {
       ctx.closePath();
 
       if (this.visibility > 0.7) {
-        ctx.font = "15px Nexa Bold";
+        ctx.font = "10px Nexa Bold";
         ctx.translate(0, -30 - points[i].sel * 20);
         ctx.scale(points[i].sel + 1, points[i].sel + 1);
         ctx.fillStyle = color.getStyle();
@@ -348,16 +348,18 @@ class trendy {
 var GROUP = new THREE.Group();
 
 var sm7 = new trendy(0, "sentiment-7");
+var sm30 = new trendy(1, "sentiment-30", true);
 // var trendPC = new trendy(1, "trend-pc");
 // var trendMobile = new trendy(2, "trend-mob");
 
 shared.scene.add(GROUP);
 GROUP.add(sm7.QUAD);
+GROUP.add(sm30.QUAD);
 // GROUP.add(trendPC.QUAD);
 // GROUP.add(trendMobile.QUAD);
 
 var STEP = -15;
-// trendPC.QUAD.position.z = STEP;
+sm30.QUAD.position.z = STEP;
 // trendMobile.QUAD.position.z = STEP * 2;
 
 export function render() {
@@ -365,7 +367,11 @@ export function render() {
   GROUP.visible = state.visibility < 0.1 ? 0 : 1;
   GROUP.position.z = -50 + state.visibility * 50;
   if (state.visibility < 0.2) return;
+  shared.data.toolTip = "";
   sm7.render();
+  sm30.render();
+  shared.camera.position.z =
+    CAM_BASE + 5 - 5 * state.visibility + state.selection * STEP;
 }
 
 shared.events.on("data", d => {
@@ -373,20 +379,25 @@ shared.events.on("data", d => {
   var toInt = (v, i, a) => {
     v = v == "" ? 0 : v;
     var i = parseInt(v);
-    if(!Number.isFinite(i)) {
-        return 0;
+    if (!Number.isFinite(i)) {
+      return 0;
     }
-    return i;//needs patch
+    return i; //needs patch
   };
   var news = d["search/getNews/"].news;
   var maxDate = periodParser(news[0].period)[1];
-  var indices = news[0].userIndexes.split(",").map(toInt);
-  indices.splice(0, indices.length - 7);
-  var max = Math.max.apply(null, indices);
+  var split = news[0].userIndexes.split(",").map(toInt);
+  var i7 = split;
+  var i30 = [];
+  for (var i = split.length - 1; i >= 0; i -= 30) {
+    i30.push(split[i]);
+  }
+  i7.splice(0, i7.length - 7);
+  var max7 = Math.max.apply(null, i7);
   var news_ct = d["News/getNews/"];
   var proc = (v, i, a) => {
     var x = i / a.length;
-    var y = v / max;
+    var y = v / max7;
     var actualD = new Date(
       maxDate.getTime() - (a.length - 1 - i) * 1 * 24 * 60 * 60 * 1000
     );
@@ -400,18 +411,36 @@ shared.events.on("data", d => {
     var obj = null;
     if (id >= 0) {
       obj = news_ct.news[id];
-      console.log(obj);
+      // console.log(obj);
     }
     return {
       x: x,
       y: y,
       q: Math.floor(y * 100) + "%",
       obj: obj,
-      d: obj ? obj.source : actualD.getMonth() + 1 + "-" + actualD.getDate()
+      d: obj ? obj.source : (actualD.getMonth() + 1) + "-" + actualD.getDate()
     };
   };
-  indices = indices.map(proc); //7 samples
-  sm7.bindData(indices);
-  console.log(JSON.stringify(d["search/getNews/"]));
-  console.log(JSON.stringify(d["News/getNews/"]));
+  i7 = i7.map(proc); //7 samples
+  sm7.bindData(i7);
+
+  var max30 = Math.max.apply(null, i30);
+  proc = (v, i, a) => {
+    var x = i / a.length;
+    var y = v / max30;
+    var actualD = new Date(
+      maxDate.getTime() - (a.length - 1 - i) * 30 * 24 * 60 * 60 * 1000
+    );
+    return {
+      x: x,
+      y: y,
+      q: Math.floor(y * 100) + "%",
+      d: actualD.getFullYear() + "-" + (actualD.getMonth() + 1) + "-" + actualD.getDate()
+    };
+  };
+  i30 = i30.map(proc); //7 samples
+  sm30.bindData(i30);
+
+  // console.log(JSON.stringify(d["search/getNews/"]));
+  // console.log(JSON.stringify(d["News/getNews/"]));
 });
