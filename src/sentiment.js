@@ -416,7 +416,7 @@ shared.events.on("data", d => {
     return {
       x: x,
       y: y,
-      q: Math.floor(y * 100) + "%",
+      q: "", //Math.floor(y * 100) + "%",
       obj: obj,
       d: obj ? obj.source : (actualD.getMonth() + 1) + "-" + actualD.getDate()
     };
@@ -434,7 +434,7 @@ shared.events.on("data", d => {
     return {
       x: x,
       y: y,
-      q: Math.floor(y * 100) + "%",
+      q: "", //Math.floor(y * 100) + "%",
       d: actualD.getFullYear() + "-" + (actualD.getMonth() + 1) + "-" + actualD.getDate()
     };
   };

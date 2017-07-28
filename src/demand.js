@@ -177,7 +177,7 @@ shared.events.on("data", d => {
     var k = Object.keys(keys);
     k.length = Math.min(k.length, 20);
     for (var i = k.length; k < blobs.length; i++) {
-      blobs[k].bindData("");
+      blobs[k].bindData(false);
     }
 
     for (var i = 0; i < k.length; i++) {
@@ -189,7 +189,7 @@ shared.events.on("data", d => {
     state.bad = false;
   } catch (e) {
     for (var i = 0; i < blobs.length; i++) {
-      blobs[i].bindData("");
+      blobs[i].bindData(false);
     }
     state.bad = true;
   }
@@ -218,5 +218,5 @@ export function render() {
   for (var i = 0; i < blobs.length; i++) {
     blobs[i].render();
   }
-  //   shared.camera.position.z = CAM_BASE + 30 - 15 * state.visibility; // + state.selection * STEP;
+  shared.camera.position.z = CAM_BASE + 30 - 15 * state.visibility; // + state.selection * STEP;
 }

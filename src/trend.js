@@ -388,7 +388,7 @@ shared.events.on("data", d => {
     return {
       x: x,
       y: y,
-      q: parseInt(v) + "%",
+      q: "", //parseInt(v) + "%",
       d: actualD.getFullYear() + "-" + (actualD.getMonth() + 1)
     };
   };
