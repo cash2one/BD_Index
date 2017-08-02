@@ -176,8 +176,8 @@ shared.events.on("data", d => {
 
     var k = Object.keys(keys);
     k.length = Math.min(k.length, 20);
-    for (var i = k.length; k < blobs.length; i++) {
-      blobs[k].bindData(false);
+    for (var i = k.length; i < blobs.length; i++) {
+      blobs[i].bindData(false);
     }
 
     for (var i = 0; i < k.length; i++) {
